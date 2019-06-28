@@ -1,7 +1,7 @@
 use std::fs;
 use std::io::prelude::*;
-use std::net::TcpStream;
 use std::net::TcpListener;
+use std::net::TcpStream;
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
@@ -19,9 +19,14 @@ fn handle_connection(mut stream: TcpStream) {
 
     stream.read(&mut buffer).unwrap();
 
-    let html = fs::read_to_string("test.html").unwrap();
-    let response = format!("HTTP/1.1 200 OK\r\n\r\n{}", html);
+    let get = b"GET / HTTP/1.1\r\n";
 
-    stream.write(response.as_bytes()).unwrap();
-    stream.flush().unwrap();
+    if buffer.starts_with(get) {
+        let html = fs::read_to_string("test.html").unwrap();
+        let response = format!("HTTP/1.1 200 OK\r\n\r\n{}", html);
+        stream.write(response.as_bytes()).unwrap();
+        stream.flush().unwrap();
+    } else {
+        println!("UNHANDLED REQUEST");
+    }
 }
