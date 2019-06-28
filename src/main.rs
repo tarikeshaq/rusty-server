@@ -21,12 +21,13 @@ fn handle_connection(mut stream: TcpStream) {
 
     let get = b"GET / HTTP/1.1\r\n";
 
-    if buffer.starts_with(get) {
-        let html = fs::read_to_string("test.html").unwrap();
-        let response = format!("HTTP/1.1 200 OK\r\n\r\n{}", html);
-        stream.write(response.as_bytes()).unwrap();
-        stream.flush().unwrap();
+    let (status_line, filepath) = if buffer.starts_with(get) {
+        ("HTTP/1.1 200 OK\r\n\r\n{}", "test.html")
+        
     } else {
-        println!("UNHANDLED REQUEST");
-    }
+        ("HTTP/1.1 404 NOT FOUND\r\n\r\n", "notfound.html")
+    };
+    let response = format!("{}{}", status_line, fs::read_to_string(filepath).unwrap());
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
 }
