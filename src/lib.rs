@@ -59,6 +59,7 @@ impl ThreadPool {
 
 impl Drop for ThreadPool {
     fn drop(&mut self) {
+        println!("Sending termination messages!");
         for _ in &mut self.workers {
             self.sender.send(Message::Terminate).unwrap();
         }
@@ -86,6 +87,7 @@ impl Worker {
                         job.call_box();
                     },
                     Message::Terminate => {
+                        println!("Worker {} is terminating",id);
                         break;
                     }
                 }
